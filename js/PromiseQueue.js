@@ -1,5 +1,5 @@
 define(['jquery', 'underscore'], function ($, _) {
-    var PromiseQueue = { 
+    return {
 
         /**
         * Waits for all of the promises to complete.
@@ -10,22 +10,23 @@ define(['jquery', 'underscore'], function ($, _) {
         * @param {Array} promises the jQuery Promise objects to wait for.
         * @returns {Object} jQuery Promise for the async wait action.
         */
-        waitForAll = function (promises) {
+        waitForAll:  function (promises) {
             var that = this,
                 $deferred = $.Deferred(),
-                pending = promises.length;
+                pending = promises.length,
+                rejects = [];
 
             results = _.map(promises, function (promise) {
                 return promise.then(function (value) {
-                           return that._resolvedState(this, value); 
+                           return that._resolvedState(this, value);
                         }, function (reason) {
-                           return that._rejectedState(this, reason); 
+                            rejects.push(that._rejectedState(this, reason));
                         }).always(function () {
                             if (!--pending) {
-                                if (results.containsRejected()) {
-                                    $deferred.reject(results);
+                                if (rejects.length) {
+                                    $deferred.reject(rejects);
                                 } else {
-                                    $deferred.resolved(results);
+                                    $deferred.resolve(results);
                                 }
                             }
                         });
@@ -62,7 +63,21 @@ define(['jquery', 'underscore'], function ($, _) {
             return {'promise': promise, 'reason': reason};
         },
 
-        waitForAll2 = function (promises) {
+        /**
+         * Checks array for any rejected promises
+         * @param {Array} results array or promises results
+         * @returns {Boolen} true if any promises are in rejected state
+         */
+        _containsRejected: function (results) {
+            results.forEach(function (promise) {
+                if (promise.state() == 'rejected') {
+                   return true;
+                }
+            });
+            return false;
+        },
+
+        waitForAll2: function (promises) {
             var $deferred = $.Deferred();
 
             $.when.apply(null, promises)
@@ -78,7 +93,7 @@ define(['jquery', 'underscore'], function ($, _) {
             return $deferred.promise();
         },
 
-        waitForAll3 = function (promises) {
+        waitForAll3: function (promises) {
             var that = this,
                 $deferred = $.Deferred(),
                 pending = promises.length,
@@ -114,6 +129,4 @@ define(['jquery', 'underscore'], function ($, _) {
             return $deferred.promise();
         }
     };
-
-    return PromiseQueue;
 });
