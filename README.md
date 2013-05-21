@@ -1,7 +1,7 @@
 promises
 ========
 
-Promise handling class that implements the following function specification.
+Promise handling module that implements the following function specification.
 ```js
 /**
 * Waits for all of the promises to complete.
