@@ -157,12 +157,17 @@ define(['PromiseQueue'], function (PromiseQueue) {
                     resolved;
                 $deferred.resolve('You rock!');
                 resolved = PromiseQueue._resolvedState($deferred.promise(), 'You rock!');
+                expect(resolved.value).toEqual('You rock!');
             });
         });
 
         describe('Rejected state helper', function () {
             it('should return rejected pojo', function () {
-            
+                var $deferred = $.Deferred(),
+                    resolved;
+                $deferred.reject('Too slow joe.');
+                rejected = PromiseQueue._rejectedState($deferred.promise(), 'Too slow joe.');
+                expect(rejected.reason).toEqual('Too slow joe.');
             });
         });
     });
