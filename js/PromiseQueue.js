@@ -14,28 +14,29 @@ define(['jquery', 'underscore'], function ($, _) {
             var that = this,
                 $deferred = $.Deferred(),
                 pending = promises.length,
-                rejects = [];
+                rejects = [], resolved = [],
+                results;
 
             results = _.map(promises, function (promise) {
                 return promise.then(function (value) {
-                           return that._resolvedState(this, value);
+                            resolved.push(that._resolvedState(this, value));
                         }, function (reason) {
                             rejects.push(that._rejectedState(this, reason));
                         }).always(function () {
                             if (!--pending) {
                                 if (rejects.length) {
                                     $deferred.reject(rejects);
-                                } else {
-                                    $deferred.resolve(results);
                                 }
+
+                                $deferred.resolve(resolved);
                             }
                         });
             });
 
             $deferred
-                .done(function (value) {
+                .done(function (values) {
                 })
-                .fail(function (reason) {
+                .fail(function (reasons) {
                 })
                 .always(function () {
                 });
